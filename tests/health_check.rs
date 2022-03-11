@@ -1,6 +1,6 @@
-use std::{fmt::format, net::TcpListener};
+use std::net::TcpListener;
 
-use actix_web::{dev::Response, HttpResponse};
+
 
 fn spawn_app() -> String {
   let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
@@ -33,7 +33,7 @@ async fn subscribe_return_200_when_valid_dataform() {
   let client = reqwest::Client::new();
 
   let body = "name=Ali%20MECERHED&email=mcrhd.ali%40gmail.com";
-  let reponse = client
+  let response = client
     .post(&format!("{}/subscriptions", &address))
     .header("Content-Type", "application/x-www-form-urlencoded")
     .body(body)
@@ -58,7 +58,7 @@ async fn subscribe_return_400_when_data_is_missing() {
 
   for (invalide_body, error_message) in test_cases {
     let response = client
-      .post(&format!("{}/subscriptions", &app_address))
+      .post(&format!("{}/subscriptions", &address))
       .header("Content-Type", "application/x-www-form-urlencoded")
       .body(invalide_body)
       .send()
