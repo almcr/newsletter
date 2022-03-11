@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -x
-set -eo pipefail
+set -e pipefail
+
 if ! [ -x "$(command -v psql)" ]; then
   echo >&2 "Error: psql is not installed."
   exit 1
@@ -41,3 +42,6 @@ done
 
 export DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}$
 sqlx database create
+sqlx migrate run
+
+>&2 echo "Postgres has been migrated, ready to go!"
