@@ -1,3 +1,4 @@
+use sqlx::{Connection, PgConnection};
 use std::net::TcpListener;
 
 fn spawn_app() -> String {
@@ -27,6 +28,11 @@ async fn health_check_works() {
 #[tokio::test]
 async fn subscribe_return_200_when_valid_dataform() {
   let address = spawn_app();
+  let config = newsletter::configuration::get_configuration().expect("Failed to get configuration");
+
+  let pg_connection = PgConnection::connect(&config.database.connection_string())
+    .await
+    .expect("Failed to connect to postgres");
 
   let client = reqwest::Client::new();
 
@@ -44,7 +50,7 @@ async fn subscribe_return_200_when_valid_dataform() {
 
 #[tokio::test]
 async fn subscribe_return_400_when_data_is_missing() {
-  let address = spawn_app();
+  let app_address = spawn_app();
 
   let client = reqwest::Client::new();
 
@@ -56,7 +62,7 @@ async fn subscribe_return_400_when_data_is_missing() {
 
   for (invalide_body, error_message) in test_cases {
     let response = client
-      .post(&format!("{}/subscriptions", &address))
+      .post(&format!("{}/subscriptions", &app_address))
       .header("Content-Type", "application/x-www-form-urlencoded")
       .body(invalide_body)
       .send()

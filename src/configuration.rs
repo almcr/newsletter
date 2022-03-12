@@ -22,3 +22,12 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
   
   settings.try_into()
 }
+
+impl DatabaseSettings {
+  pub fn connection_string(&self) -> String {
+    format!(
+      "postgress://{}:{}@{}:{}/{}",
+      self.username, self.password, self.host, self.port, self.db_name
+    )
+  }
+}
