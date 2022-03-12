@@ -1,7 +1,9 @@
 use std::net::TcpListener;
 use newsletter::startup::run;
+use newsletter::configuration::get_configuration;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-  run(TcpListener::bind("127.0.0.1:8080").expect("failed to bind"))?.await
+  let settings = get_configuration().expect("Faield to parse configuration");
+  run(TcpListener::bind(format!("localhost:{}", settings.app_port)).expect("failed to bind"))?.await
 }
