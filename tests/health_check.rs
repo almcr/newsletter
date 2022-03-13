@@ -1,4 +1,4 @@
-use sqlx::{Connection, PgConnection};
+use sqlx::{Connection, PgConnection, Executor};
 use std::net::TcpListener;
 
 fn spawn_app() -> String {
@@ -30,9 +30,10 @@ async fn subscribe_return_200_when_valid_dataform() {
   let address = spawn_app();
   let config = newsletter::configuration::get_configuration().expect("Failed to get configuration");
 
-  let pg_connection = PgConnection::connect(&config.database.connection_string())
+  let mut pg_connection = PgConnection::connect(&config.database.connection_string())
     .await
     .expect("Failed to connect to postgres");
+  
 
   let client = reqwest::Client::new();
 
@@ -46,6 +47,14 @@ async fn subscribe_return_200_when_valid_dataform() {
     .expect("Failed to send request");
 
   assert_eq!(200, response.status().as_u16());
+  
+  let saved = sqlx::query!("SELECT email, name FROM subscriptions")
+    .fetch_one(&mut pg_connection)
+    .await
+    .expect("Failed to fetch saved data");
+
+  assert_eq!(saved.email, "ursula_le_guin@gmail.com");
+  assert_eq!(saved.name, "le guin");
 }
 
 #[tokio::test]
